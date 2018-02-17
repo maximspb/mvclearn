@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: root
- * Date: 2/17/18
- * Time: 7:46 AM
- */
 
 namespace App\Exceptions;
 
