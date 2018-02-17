@@ -9,6 +9,7 @@
 namespace App\Controllers;
 
 use App\Database;
+use App\Exceptions\EditException;
 use App\Exceptions\NotFoundException;
 use App\Models\News;
 
@@ -54,14 +55,21 @@ class NewsController extends Controller
         $article = !empty($this->news_id) ? News::findOne($this->news_id) : new News();
         ob_start();
         include $this->templates['form'];
+
+        $view = ob_get_contents();
         ob_end_flush();
         if (isset($_POST['submit'])) :
-            $article->title = $_POST['title'];
-            $article->text = $_POST['text'];
-            $article->save();
-            header('Location:/index');
-            exit();
+            try{
+                $article->title = $_POST['title'];
+                $article->text = $_POST['text'];
+                $article->save();
+                header('Location:/news/edit/?id='.$article->id);
+                exit();
+            } catch (\Throwable $e) {
+            throw new EditException();
+            }
         endif;
+        return $view;
     }
 
     public function actionDelete()
@@ -70,6 +78,7 @@ class NewsController extends Controller
             try {
                 News::delete($this->news_id);
                 header('Location:/');
+                exit();
             } catch (\Throwable $exception) {
                 throw  new $exception('Ошибка удаления записи');
             }

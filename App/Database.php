@@ -29,8 +29,8 @@ class Database
                 $config['username'],
                 $config['password']
             );
-        } catch (\PDOException $exception) {
-            throw new DbConnectException();
+        } catch (\Throwable $exception) {
+           throw new DbConnectException('На сайте ведутся технические работы');
         }
     }
 
@@ -72,7 +72,7 @@ class Database
      */
     public function setId()
     {
-        return $this->connect()->lastInsertId();
+        return $this->connect->lastInsertId();
     }
 
 
