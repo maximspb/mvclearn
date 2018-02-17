@@ -70,6 +70,7 @@ class NewsController extends Controller
             try {
                 News::delete($this->news_id);
                 header('Location:/');
+                exit();
             } catch (\Throwable $exception) {
                 throw  new $exception('Ошибка удаления записи');
             }
