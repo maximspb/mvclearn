@@ -17,5 +17,7 @@
     </h3>
 </a>
 <?php endforeach; ?>
+<hr>
+<a href="/news/edit">Создать новость</a>
 </body>
 </html>

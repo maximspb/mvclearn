@@ -72,7 +72,7 @@ class Database
      */
     public function setId()
     {
-        return $this->connect()->lastInsertId();
+        return $this->connect->lastInsertId();
     }
 
 
