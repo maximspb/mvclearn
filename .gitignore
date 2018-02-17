@@ -1,2 +1,5 @@
 vendor
 .idea
+.phpintel
+config_db.php
+App/configs/*

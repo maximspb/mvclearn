@@ -29,8 +29,8 @@ class Database
                 $config['username'],
                 $config['password']
             );
-        } catch (\PDOException $exception) {
-            throw new DbConnectException();
+        } catch (\Throwable $exception) {
+           throw new DbConnectException('На сайте ведутся технические работы');
         }
     }
 

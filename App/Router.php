@@ -22,16 +22,15 @@ class Router
         if (class_exists($class)) :
             $controller = new $class();
         else :
-            throw new NotFoundException('e1');
+            throw new NotFoundException('Неверный адрес');
         endif;
 
         $action = 'action'.ucfirst($actionType) ?? 'actionIndex';
 
         try {
                 $controller->$action();
-
-        } catch (\Throwable $exception) {
-            throw new $exception();
+        } catch (\Throwable  $exception) {
+            throw $exception;
         }
     }
 
