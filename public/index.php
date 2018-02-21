@@ -9,7 +9,7 @@ try{
 } catch (\App\Exceptions\NotFoundException $e){
     echo $e->getMessage();
     exit(1);
-} catch (\App\Exceptions\DbConnectException $e){
+} catch (\App\Exceptions\CommentException $e){
     echo $e->getMessage();
     exit(1);
 } catch (\Throwable $e){

@@ -19,18 +19,19 @@ class Database
 
     private function __construct()
     {
-        //config_db.php добавлен в .gitignore
-        $config = require_once __DIR__.'/configs/config_db.php';
+
+        $config = Config::getInstance()->getParams()['dbConnect'];
+
         try {
             $this->connect = new \PDO(
                 'mysql:host=' . $config['host'] .
                 ';dbname=' . $config['dbname'] .
                 '; charset =' . $config['charset'],
                 $config['username'],
-                $config['password']
+                $config['passwd']
             );
         } catch (\Throwable $exception) {
-           throw new DbConnectException('На сайте ведутся технические работы');
+            throw new DbConnectException();
         }
     }
 

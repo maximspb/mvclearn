@@ -1,0 +1,8 @@
+{% extends 'layout.twig' %}
+{% block body %}
+    <a href="/news/edit">Создать новость</a>
+{%for article in news%}
+    <h3><a href="/news/read/?id={{article.id}}">{{article.title}}</a></h3>
+
+{%endfor%}
+{% endblock %}

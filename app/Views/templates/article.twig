@@ -1,0 +1,21 @@
+{% extends 'layout.twig' %}
+{% block body %}
+<a href="/news/edit/?id={{article.id}}">Редактировать новость</a> || <a href="/news/delete/?id={{article.id}}">Удалить новость</a>
+<h1>{{article.title}}</h1>
+<p>
+    {{article.text}}
+</p>
+{% for comment in comments %}
+   <h4>{{ comment.username }}</h4>
+
+       <div style="border: 1px dotted black; width: 20%">{{ comment.text }}<br>
+           <a href="/comment/delete/?commentId={{comment.id}}&articleId={{ article.id }}">Удалить комментарий</a>
+       </div>
+{% endfor %}
+
+    <form action="/comment/create/?id={{article.id}}" method="post">
+        <input type="text" name="username"><br>
+        <input type="text" name="text"><br>
+        <button type="submit">Отправить коммент</button>
+    </form>
+{% endblock %}

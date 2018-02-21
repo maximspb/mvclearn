@@ -34,10 +34,10 @@ abstract class BaseModel
 
     protected static function setTable()
     {
-        if (empty(static::$table)) :
+        if (empty(static::$table)) {
             static::$table = strtolower((new \ReflectionClass(static::class))
                 ->getShortName());
-        endif;
+        }
     }
 
 
@@ -45,7 +45,7 @@ abstract class BaseModel
     {
 
         static::setTable();
-        $sql = 'SELECT * from '. static::$table;
+        $sql = 'SELECT * FROM '. static::$table;
         return Database::getInstance()->query($sql, [], static::class);
     }
 
@@ -53,15 +53,15 @@ abstract class BaseModel
     public static function findOne($id)
     {
         static::setTable();
-        $sql = 'SELECT * from '. static::$table. ' WHERE id =:id';
+        $sql = 'SELECT * FROM '. static::$table. ' WHERE id =:id';
         $options =[':id'=>$id];
 
         $result = Database::getInstance()->query($sql, $options, static::class);
-        if (!empty($result)) :
+        if (!empty($result)) {
             return $result[0];
-        else:
-            throw new NotFoundException('айди');
-        endif;
+        } else {
+            throw new NotFoundException();
+        }
     }
 
 
@@ -71,14 +71,14 @@ abstract class BaseModel
         $tableFields =[];
         $insertValues =[];
 
-        foreach ($vars as $propertyName => $value) :
-            if ('id' === $propertyName) :
+        foreach ($vars as $propertyName => $value) {
+            if ('id' === $propertyName) {
                 continue;
-            endif;
+            }
 
             $tableFields[] = $propertyName;
             $insertValues[':'.$propertyName] = $value;
-        endforeach;
+        }
 
         $sql = 'INSERT INTO '.static::$table.
             ' ('.implode(', ', $tableFields).') VALUES ('.
@@ -95,20 +95,20 @@ abstract class BaseModel
         $vars = get_object_vars($this);
         $setFields =[];
         $updateValues =[':id'=>$this->id];
-
-        foreach ($vars as $propertyName => $value) :
-            if ('id' === $propertyName) :
+        $options = [':id'=>$this->id];
+        foreach ($vars as $propertyName => $value) {
+            if ('id' === $propertyName) {
                 continue;
-            endif;
-
+            }
             $setFields[] = $propertyName.' = :'.$propertyName;
             $updateValues[':'.$propertyName] = $value;
-        endforeach;
+        }
 
         $sql = 'UPDATE '
             .static::$table.
             ' SET '.implode(', ', $setFields).
             ' WHERE id = :id';
+
         Database::getInstance()->execute($sql, $updateValues);
     }
 
@@ -125,10 +125,10 @@ abstract class BaseModel
 
     public function save()
     {
-        if (!empty($this->id)) :
+        if (!empty($this->id)) {
             $this->update();
-        else :
+        } else {
             $this->insert();
-        endif;
+        }
     }
 }

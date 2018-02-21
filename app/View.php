@@ -2,32 +2,32 @@
 
 namespace App;
 
+use App\Traits\MagicSetTrait;
+use Twig_Loader_Filesystem;
+use Twig_Environment;
+
 class View
 {
-
-    public $table;
-    protected $data;
-
-    public function __set($name, $value)
+    use MagicSetTrait;
+    protected $twig;
+    public function __construct()
     {
-        $this->data[$name] = $value;
-
-
+        $templatesPath = Config::getInstance()->getParams()['templates']['path'];
+        $cache = Config::getInstance()->getParams()['cache']['twig'];
+        $loader = new Twig_Loader_Filesystem($templatesPath);
+        $this->twig = new Twig_Environment($loader, [
+            'cache' => $cache,
+            'debug'=>true
+            ]);
     }
 
-    public function __get($name)
+    public function display(string $template, array $params = [])
     {
-        return $this->data[$name];
+        try {
+            $this->twig->display($template, $params);
+        } catch (\Exception|\Throwable $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
     }
-
-    public function __isset($name)
-    {
-        return isset($this->data[$name]);
-    }
-
-    public function getData()
-    {
-        return $this->data;
-    }
-
 }

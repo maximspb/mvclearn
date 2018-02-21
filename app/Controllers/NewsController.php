@@ -2,78 +2,74 @@
 
 namespace App\Controllers;
 
-use App\Database;
 use App\Exceptions\EditException;
 use App\Exceptions\NotFoundException;
+use App\Models\Comment;
 use App\Models\News;
 
 class NewsController extends Controller
 {
-    protected $templates =[];
-    protected $news_id;
 
+    protected $news_id;
     public function __construct()
     {
-        $this->templates['index'] = __DIR__.'/../Views/templates/index.php';
-        $this->templates['article'] = __DIR__.'/../Views/templates/article.php';
-        $this->templates['form'] = __DIR__.'/../Views/templates/editForm.php';
-        $this->news_id =  $_GET['id'] ?? null;
+        parent::__construct();
+        $this->news_id =  $this->request->addRequest('id');
     }
 
     public function actionIndex()
     {
         $news = News::findAll();
-        include $this->templates['index'];
+        $this->view->display('news.twig', ['news'=>$news]);
     }
 
     public function actionRead()
     {
-
         try {
-            $article = News::findOne($this->news_id);
+            $article = News::findOne(strip_tags($this->news_id));
         } catch (NotFoundException $exception) {
                 echo $exception->getMessage();
                 exit(1);
         }
-        ob_start();
-        include $this->templates['article'];
-        $view = ob_get_contents();
-        ob_end_flush();
-        return $view;
+        $comments = Comment::findArticleComments([':id'=>$this->news_id]);
+        $this->view->display('article.twig', ['article' => $article, 'comments'=> $comments]);
     }
 
     public function actionEdit()
     {
-        $article = !empty($this->news_id) ? News::findOne($this->news_id) : new News();
-        ob_start();
-        include $this->templates['form'];
+        $id = $this->news_id;
+        $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
+        $this->view->display('editForm.twig', ['article'=> $article]);
+    }
 
-        $view = ob_get_contents();
-        ob_end_flush();
-        if (isset($_POST['submit'])) :
-            try {
-                $article->title = $_POST['title'];
-                $article->text = $_POST['text'];
-                $article->save();
-                header('Location:/news/edit/?id='.$article->id);
-                exit();
-            } catch (\Throwable $e) {
+    public function actionSave()
+    {
+        $id = $this->news_id;
+        $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
+        $title = $this->request->addRequest('title');
+        $text = $this->request->addRequest('text');
+        try {
+            $article->title = strip_tags($title);
+            $article->text = strip_tags($text);
+            $article->save();
+            header('Location:/news');
+            exit();
+
+        } catch (\Throwable $e) {
             throw new EditException();
-            }
-        endif;
-        return $view;
+        }
     }
 
     public function actionDelete()
     {
-        if (!empty($this->news_id)) :
+        if (!empty(strip_tags($this->news_id))) {
             try {
-                News::delete($this->news_id);
+                News::delete(strip_tags($this->news_id));
                 header('Location:/');
                 exit();
             } catch (\Throwable $exception) {
                 throw  new $exception('Ошибка удаления записи');
             }
-        endif;
+        }
     }
 }
