@@ -1,5 +1,5 @@
 vendor
 .idea
 .phpintel
-app/configs
+
 app/cache
