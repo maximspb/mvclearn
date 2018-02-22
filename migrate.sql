@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `comment` (
   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `username` varchar(255) NOT NULL,
   `text` varchar(255) NOT NULL,
-  `news_id` int(11) NOT NULL
+  `newsId` int(11) NOT NULL
 ) ENGINE='InnoDB' COLLATE 'utf8_general_ci';
 
 INSERT INTO `news` (`title`, `text`)
