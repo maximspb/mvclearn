@@ -18,5 +18,5 @@ CREATE TABLE IF NOT EXISTS `comment` (
 INSERT INTO `news` (`title`, `text`)
 VALUES ('demo title', 'demo text');
 
-INSERT INTO `comment` (`username`, `text`, `news_id`)
+INSERT INTO `comment` (`username`, `text`, `newsId`)
 VALUES ('guest', 'first demo comment', '1');
