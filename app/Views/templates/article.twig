@@ -1,21 +1,26 @@
 {% extends 'layout.twig' %}
 {% block body %}
-<a href="/news/edit/?id={{article.id}}">Редактировать новость</a> || <a href="/news/delete/?id={{article.id}}">Удалить новость</a>
-<h1>{{article.title}}</h1>
+<div align="right">
+    <a href="/news/edit/?id={{article.id}}" class="btn btn-dark">Редактировать новость</a> ||
+    <a href="/news/delete/?id={{article.id}}" class="btn btn-danger">Удалить новость</a>
+</div>
+<h1 id="articleTitle">{{article.title}}</h1>
+
 <p>
     {{article.text}}
 </p>
 {% for comment in comments %}
-   <h4>{{ comment.username }}</h4>
-
-       <div style="border: 1px dotted black; width: 20%">{{ comment.text }}<br>
+   <div class="comment">
+    <span class="userName">{{ comment.username }}</span>
+       <div class="commentBody">{{ comment.text }}<br>
            <a href="/comment/delete/?commentId={{comment.id}}&articleId={{ article.id }}">Удалить комментарий</a>
        </div>
+   </div>
 {% endfor %}
 
-    <form action="/comment/create/?id={{article.id}}" method="post">
-        <input type="text" name="username"><br>
-        <input type="text" name="text"><br>
-        <button type="submit">Отправить коммент</button>
+    <form id="editForm" action="/comment/create/?id={{article.id}}" method="post" class="form-group">
+        <input type="text" name="username" class="form-control"><br>
+        <input type="text" name="text" class="form-control"><br>
+        <button type="submit" class="btn btn-success">Отправить коммент</button>
     </form>
 {% endblock %}
