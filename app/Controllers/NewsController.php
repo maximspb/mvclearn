@@ -19,27 +19,27 @@ class NewsController extends Controller
 
     public function actionIndex()
     {
-        $news = News::findAll();
-        $this->view->display('news.twig', ['news'=>$news]);
+        $this->view->news = News::findAll();
+        $this->view->display('news.twig', $this->view->getData());
     }
 
     public function actionRead()
     {
         try {
-            $article = News::findOne(strip_tags($this->news_id));
+            $this->view->article = News::findOne(strip_tags($this->news_id));
         } catch (NotFoundException $exception) {
                 echo $exception->getMessage();
                 exit(1);
         }
-        $comments = Comment::findArticleComments([':id'=>$this->news_id]);
-        $this->view->display('article.twig', ['article' => $article, 'comments'=> $comments]);
+        $this->view->comments = Comment::findArticleComments([':id'=>$this->news_id]);
+        $this->view->display('article.twig', $this->view->getData());
     }
 
     public function actionEdit()
     {
         $id = $this->news_id;
-        $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
-        $this->view->display('editForm.twig', ['article'=> $article]);
+        $this->view->article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
+        $this->view->display('editForm.twig', $this->view->getData());
     }
 
     public function actionSave()
