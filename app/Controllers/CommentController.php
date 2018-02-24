@@ -11,13 +11,13 @@ class CommentController extends Controller
     {
         $text = $this->request->addRequest('text');
         $username = $this->request->addRequest('username');
-        $id = $this->request->addRequest('id');
+        $articleId = $this->request->addRequest('articleId');
 
-        if (!empty($text) && !empty($username) && !empty($id)) {
+        if (!empty($text) && !empty($username) && !empty($articleId)) {
             try {
-                $comment = new Comment($id, $username, $text);
+                $comment = new Comment($articleId, $username, $text);
                 $comment->save();
-                header('Location:/news/read/?id='.$id);
+                header('Location:/news/read/?id='.$articleId);
             } catch (\Throwable $e) {
                 throw new CommentException();
             }
