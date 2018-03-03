@@ -10,21 +10,27 @@ class Comment extends BaseModel
     protected $newsId;
     protected $username;
     protected $text;
+    protected static $table = 'comment';
 
-    public function __construct($newsId, $username, $text)
+    public static function findNewsComments($id)
     {
-        $this->newsId = $newsId;
-        $this->username = $username;
-        $this->text = $text;
-        parent::__construct();
-    }
-
-    public static function findArticleComments($options = [])
-    {
+        $options =[':id' => $id];
         $sql = 'SELECT * from comment WHERE newsId =:id';
         return Database::getInstance()->query($sql, $options);
     }
 
+    protected function usernameValidate(string $username)
+    {
+        return strlen($username) > 2;
+    }
 
+    protected function textValidate(string $text)
+    {
+        return !empty($text);
+    }
 
+    protected function newsIdValidate($newsId)
+    {
+        return !empty($newsId);
+    }
 }

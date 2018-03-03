@@ -4,13 +4,20 @@ namespace App;
 
 class Config
 {
+    /**
+     * @var Config
+     * экземпляр класса
+     */
     private static $instance;
+
     private $params;
 
     protected function __construct()
     {
         $this->params = require_once __DIR__ . '/configs/config-main.php';
     }
+
+
     public static function getInstance()
     {
         if (empty(self::$instance)) {
@@ -18,6 +25,8 @@ class Config
         }
         return self::$instance;
     }
+
+
     public function getParams()
     {
         return $this->params;

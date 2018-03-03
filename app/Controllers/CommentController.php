@@ -1,34 +1,35 @@
 <?php
 namespace App\Controllers;
 
-use App\Exceptions\CommentException;
-use App\Exceptions\DeleteCommentException;
+use App\Application;
 use App\Models\Comment;
+use App\Exceptions\MultiException;
+use App\Exceptions\DeleteCommentException;
 
 class CommentController extends Controller
 {
     public function actionCreate()
     {
-        $text = $this->request->addRequest('text');
-        $username = $this->request->addRequest('username');
-        $articleId = $this->request->addRequest('articleId');
-
-        if (!empty($text) && !empty($username) && !empty($articleId)) {
-            try {
-                $comment = new Comment($articleId, $username, $text);
-                $comment->save();
-                header('Location:/news/read/?id='.$articleId);
-            } catch (\Throwable $e) {
-                throw new CommentException();
+        $newsId = Application::getRequest('newsId');
+        try {
+            $comment = new Comment();
+            $comment->fill(Application::getMultiple());
+            $comment->save();
+            unset($_SESSION['errorsExist']);
+            header('Location:/news/read/?id='.$newsId);
+        } catch (MultiException $e) {
+            if (!empty($e)) {
+                $_SESSION['errorsExist'] = true;
             }
+            header('Location:/news/read/?id='.$newsId);
         }
     }
 
 
     public function actionDelete()
     {
-        $commentId = $this->request->addRequest('commentId');
-        $articleId = $this->request->addRequest('articleId');
+        $commentId = Application::getRequest('commentId');
+        $articleId = Application::getRequest('articleId');
         try {
             Comment::delete($commentId);
             header('Location:/news/read/?id='.$articleId);

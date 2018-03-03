@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Exceptions\MultiException;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\Validate\ValidateException;
 
 abstract class BaseModel
 {
@@ -16,35 +18,8 @@ abstract class BaseModel
     public $id;
 
 
-    public function __construct()
-    {
-
-        static::setTable();
-    }
-
-    /**
-     * @throws \ReflectionException
-     * статичный метод, который задает имя таблицы
-     * из бд для этой модели, если имя не задано явно:
-     * в качестве имени записывается имя модели в нижнем регистре
-     * т.к. мы подразумеваем, что AR-модель по умолчанию одноименна
-     * своей таблице в БД. Но есть возможность переопределить таблицу
-     * при необходимости.
-     */
-
-    protected static function setTable()
-    {
-        if (empty(static::$table)) {
-            static::$table = strtolower((new \ReflectionClass(static::class))
-                ->getShortName());
-        }
-    }
-
-
     public static function findAll()
     {
-
-        static::setTable();
         $sql = 'SELECT * FROM '. static::$table;
         return Database::getInstance()->query($sql, [], static::class);
     }
@@ -52,7 +27,6 @@ abstract class BaseModel
 
     public static function findOne($id)
     {
-        static::setTable();
         $sql = 'SELECT * FROM '. static::$table. ' WHERE id =:id';
         $options =[':id'=>$id];
 
@@ -93,9 +67,8 @@ abstract class BaseModel
     protected function update()
     {
         $vars = get_object_vars($this);
-        $setFields =[];
-        $updateValues =[':id'=>$this->id];
-        $options = [':id'=>$this->id];
+        $setFields = [];
+        $updateValues =[':id' => $this->id];
         foreach ($vars as $propertyName => $value) {
             if ('id' === $propertyName) {
                 continue;
@@ -115,7 +88,6 @@ abstract class BaseModel
 
     public static function delete($id)
     {
-        static::setTable();
         $options =[':id'=>$id];
         $sql = 'DELETE  FROM '. static::$table.' WHERE id = :id';
 
@@ -129,6 +101,47 @@ abstract class BaseModel
             $this->update();
         } else {
             $this->insert();
+        }
+    }
+
+    /**
+     * @param array $data
+     * @throws MultiException
+     * метод заполнения модели данными из массива,
+     * к примеру - из полей формы. В случае невалидного
+     * ввода какого-либо поля в объект-мультиисключение
+     * записывается соответствующее исключение.
+     */
+    public function fill(array $data)
+    {
+        $errors = new MultiException();
+        foreach ($data as $property => $value) {
+            if ('id'== $property || !property_exists($this, $property)) {
+                continue;
+            }
+
+            $exception ='App\\Exceptions\\Validate\\'. ucfirst($property).'Exception';
+            $validation = $property.'Validate';
+
+            if (method_exists($this, $validation) && !$this->$validation($value)) {
+                if (class_exists($exception)) {
+                    $errors->addError(new $exception);
+                } else {
+                    $errors->addError(new ValidateException());
+                }
+            }
+        }
+        if ($errors->empty()) {
+            foreach ($data as $key => $value) {
+                if (!property_exists($this, $key)) {
+                    continue;
+                }
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+        } else {
+            throw $errors;
         }
     }
 }

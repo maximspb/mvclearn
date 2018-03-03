@@ -9,18 +9,6 @@
 <p>
     {{article.text}}
 </p>
-{% for comment in comments %}
-   <div class="comment">
-    <span class="userName">{{ comment.username }}</span>
-       <div class="commentBody">{{ comment.text }}<br>
-           <a href="/comment/delete/?commentId={{comment.id}}&articleId={{ article.id }}">Удалить комментарий</a>
-       </div>
-   </div>
-{% endfor %}
-
-    <form id="editForm" action="/comment/create/?articleId={{article.id}}" method="post" class="form-group">
-        <input type="text" name="username" class="form-control"><br>
-        <input type="text" name="text" class="form-control"><br>
-        <button type="submit" class="btn btn-success">Отправить коммент</button>
-    </form>
+    {% set vars = {'article' : article, 'session' : session} %}
+    {% include 'comments.twig' with vars %}
 {% endblock %}

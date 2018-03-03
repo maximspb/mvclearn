@@ -2,9 +2,9 @@
 
 namespace App;
 
-use App\Traits\MagicSetTrait;
-use Twig_Loader_Filesystem;
 use Twig_Environment;
+use Twig_Loader_Filesystem;
+use App\Traits\MagicSetTrait;
 
 class View
 {
@@ -19,6 +19,8 @@ class View
             'cache' => $cache,
             'debug'=>true
             ]);
+        $logged =!empty($_SESSION['logged']) ? true : false;
+        $this->twig->addGlobal('logged', $logged);
     }
 
     public function display(string $template, array $params = [])
@@ -29,5 +31,10 @@ class View
             echo $e->getMessage();
             exit(1);
         }
+    }
+
+    public function twig()
+    {
+        return $this->twig;
     }
 }

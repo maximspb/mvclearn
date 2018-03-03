@@ -2,10 +2,12 @@
 
 namespace App\Controllers;
 
-use App\Exceptions\EditException;
-use App\Exceptions\NotFoundException;
-use App\Models\Comment;
+use App;
 use App\Models\News;
+use App\Application;
+use App\Models\Comment;
+use App\Exceptions\MultiException;
+use App\Exceptions\NotFoundException;
 
 class NewsController extends Controller
 {
@@ -14,49 +16,62 @@ class NewsController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->news_id =  $this->request->addRequest('id');
+        $this->news_id = Application::getRequest('id');
     }
 
     public function actionIndex()
     {
-        $this->view->news = News::findAll();
-        $this->view->display('news.twig', $this->view->getData());
+        $news = News::findAll();
+        $this->view->display('news.twig', ['news' => $news]);
     }
 
     public function actionRead()
     {
+        $session  = $_SESSION;
+
         try {
-            $this->view->article = News::findOne(strip_tags($this->news_id));
+            $article = News::findOne(strip_tags($this->news_id));
+
         } catch (NotFoundException $exception) {
                 echo $exception->getMessage();
                 exit(1);
         }
-        $this->view->comments = Comment::findArticleComments([':id'=>$this->news_id]);
-        $this->view->display('article.twig', $this->view->getData());
+        $comments = Comment::findNewsComments(strip_tags($this->news_id));
+        $this->view->display('article.twig', [
+            'article' => $article,
+            'comments' => $comments,
+            'session' => $session,
+        ]);
     }
 
     public function actionEdit()
     {
         $id = $this->news_id;
-        $this->view->article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
-        $this->view->display('editForm.twig', $this->view->getData());
+        try {
+            $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
+        } catch (NotFoundException $exception) {
+            echo $exception->getMessage();
+            exit(1);
+        }
+        $this->view->display('editForm.twig', ['article' =>  $article]);
     }
 
     public function actionSave()
     {
         $id = $this->news_id;
         $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
-        $title = $this->request->addRequest('title');
-        $text = $this->request->addRequest('text');
         try {
-            $article->title = strip_tags($title);
-            $article->text = strip_tags($text);
+            $article->fill(Application::getMultiple());
             $article->save();
             header('Location:/news');
             exit();
 
-        } catch (\Throwable $e) {
-            throw new EditException();
+        } catch (MultiException $e) {
+            $articleErrors = $e->getAllErrors();
+            $this->view->display('editForm.twig', [
+                'article' => $article,
+                'articleErrors' => $articleErrors
+            ]);
         }
     }
 
@@ -68,7 +83,7 @@ class NewsController extends Controller
                 header('Location:/');
                 exit();
             } catch (\Throwable $exception) {
-                throw  new $exception('Ошибка удаления записи');
+                throw  new $exception();
             }
         }
     }

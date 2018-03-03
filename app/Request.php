@@ -5,18 +5,41 @@ class Request
 {
 
     protected $method;
-    protected $uriParts;
 
     public function __construct()
     {
         $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->uriParts = explode('/', $_SERVER['REQUEST_URI']);
     }
 
     public function addRequest($param, $default = null)
     {
         return $_REQUEST[$param] ?? $default;
     }
+
+    public function execute($param)
+    {
+        switch ($this->method) {
+            case 'GET' === $this->method:
+                return $this-> get($param);
+                break;
+            case 'POST' === $this->method:
+                return $this->post($param);
+                break;
+            default:
+                return null;
+        }
+    }
+
+    protected function get($param, $default = null)
+    {
+        return $_GET[$param] ?? $default;
+    }
+
+    protected function post($param, $default = null)
+    {
+        return $_POST[$param] ?? $default;
+    }
+
 
 
     /**
@@ -30,17 +53,5 @@ class Request
             $result[$key] = $value;
         }
         return $result;
-    }
-
-    public function getControllerName()
-    {
-        $controller = !empty($this->uriParts[1]) ? $this->uriParts[1] : 'index';
-        return $controller;
-    }
-
-    public function getActionType()
-    {
-        $actionType = !empty($this->uriParts[2]) ? $this->uriParts[2] : 'index';
-        return $actionType;
     }
 }

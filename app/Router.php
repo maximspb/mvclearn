@@ -6,10 +6,14 @@ use App\Exceptions\NotFoundException;
 class Router
 {
 
-    public static function getRoute(Request $request)
+    public static function getRoute()
     {
 
-        $class = '\\App\\Controllers\\'.ucfirst($request->getControllerName()).'Controller';
+
+        $uriParts = explode('/', $_SERVER['REQUEST_URI']);
+        $controllerName = !empty($uriParts[1]) ? $uriParts[1] : 'index';
+        $actionType = !empty($uriParts[2]) ? $uriParts[2] : 'index';
+        $class = '\\App\\Controllers\\'.ucfirst($controllerName).'Controller';
 
         if (class_exists($class)) {
             $controller = new $class();
@@ -17,7 +21,7 @@ class Router
             throw new NotFoundException();
         }
 
-        $action = 'action'.ucfirst($request->getActionType());
+        $action = 'action'.ucfirst($actionType);
 
         try {
                 $controller->$action();

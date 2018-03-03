@@ -4,7 +4,6 @@ namespace App;
 
 
 use App\Exceptions\DbConnectException;
-use App\Exceptions\NotFoundException;
 
 /**
  * Class Database

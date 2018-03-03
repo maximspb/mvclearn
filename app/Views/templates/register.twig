@@ -1,0 +1,19 @@
+{% extends 'layout.twig' %}
+{% block body %}
+    {% if userExists == true %}
+        <div class="form-error alert-danger">Пользователь с таким e-mail уже зарегистрирован!</div>
+    {% endif %}
+<form action="/user/create" method="post" class="form-group">
+    <div class="form-error alert-danger">{{ errors.email.getmessage }}</div>
+    <input type="text" name="email" class="form-control" placeholder="e-mail" required>
+    <div class="form-error alert-danger">{{ errors.name.getmessage }}</div>
+
+    <input type="text" name="name" class="form-control" placeholder="Имя" required>
+    <div class="form-error alert-danger">{{ errors.password.getmessage }}</div>
+
+    <input type="password" name="password" class="form-control" placeholder="Пароль" required>
+
+    <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+</form>
+
+{% endblock %}
