@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Exceptions\MultiException;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\Validate\ValidateException;
 
 abstract class BaseModel
 {
@@ -16,52 +18,24 @@ abstract class BaseModel
     public $id;
 
 
-    public function __construct()
-    {
-
-        static::setTable();
-    }
-
-    /**
-     * @throws \ReflectionException
-     * статичный метод, который задает имя таблицы
-     * из бд для этой модели, если имя не задано явно:
-     * в качестве имени записывается имя модели в нижнем регистре
-     * т.к. мы подразумеваем, что AR-модель по умолчанию одноименна
-     * своей таблице в БД. Но есть возможность переопределить таблицу
-     * при необходимости.
-     */
-
-    protected static function setTable()
-    {
-        if (empty(static::$table)) :
-            static::$table = strtolower((new \ReflectionClass(static::class))
-                ->getShortName());
-        endif;
-    }
-
-
     public static function findAll()
     {
-
-        static::setTable();
-        $sql = 'SELECT * from '. static::$table;
+        $sql = 'SELECT * FROM '. static::$table;
         return Database::getInstance()->query($sql, [], static::class);
     }
 
 
     public static function findOne($id)
     {
-        static::setTable();
-        $sql = 'SELECT * from '. static::$table. ' WHERE id =:id';
+        $sql = 'SELECT * FROM '. static::$table. ' WHERE id =:id';
         $options =[':id'=>$id];
 
         $result = Database::getInstance()->query($sql, $options, static::class);
-        if (!empty($result)) :
+        if (!empty($result)) {
             return $result[0];
-        else:
-            throw new NotFoundException('айди');
-        endif;
+        } else {
+            throw new NotFoundException();
+        }
     }
 
 
@@ -71,14 +45,14 @@ abstract class BaseModel
         $tableFields =[];
         $insertValues =[];
 
-        foreach ($vars as $propertyName => $value) :
-            if ('id' === $propertyName) :
+        foreach ($vars as $propertyName => $value) {
+            if ('id' === $propertyName) {
                 continue;
-            endif;
+            }
 
             $tableFields[] = $propertyName;
             $insertValues[':'.$propertyName] = $value;
-        endforeach;
+        }
 
         $sql = 'INSERT INTO '.static::$table.
             ' ('.implode(', ', $tableFields).') VALUES ('.
@@ -93,29 +67,27 @@ abstract class BaseModel
     protected function update()
     {
         $vars = get_object_vars($this);
-        $setFields =[];
-        $updateValues =[':id'=>$this->id];
-
-        foreach ($vars as $propertyName => $value) :
-            if ('id' === $propertyName) :
+        $setFields = [];
+        $updateValues =[':id' => $this->id];
+        foreach ($vars as $propertyName => $value) {
+            if ('id' === $propertyName) {
                 continue;
-            endif;
-
+            }
             $setFields[] = $propertyName.' = :'.$propertyName;
             $updateValues[':'.$propertyName] = $value;
-        endforeach;
+        }
 
         $sql = 'UPDATE '
             .static::$table.
             ' SET '.implode(', ', $setFields).
             ' WHERE id = :id';
+
         Database::getInstance()->execute($sql, $updateValues);
     }
 
 
     public static function delete($id)
     {
-        static::setTable();
         $options =[':id'=>$id];
         $sql = 'DELETE  FROM '. static::$table.' WHERE id = :id';
 
@@ -125,10 +97,51 @@ abstract class BaseModel
 
     public function save()
     {
-        if (!empty($this->id)) :
+        if (!empty($this->id)) {
             $this->update();
-        else :
+        } else {
             $this->insert();
-        endif;
+        }
+    }
+
+    /**
+     * @param array $data
+     * @throws MultiException
+     * метод заполнения модели данными из массива,
+     * к примеру - из полей формы. В случае невалидного
+     * ввода какого-либо поля в объект-мультиисключение
+     * записывается соответствующее исключение.
+     */
+    public function fill(array $data)
+    {
+        $errors = new MultiException();
+        foreach ($data as $property => $value) {
+            if ('id'== $property || !property_exists($this, $property)) {
+                continue;
+            }
+
+            $exception ='App\\Exceptions\\Validate\\'. ucfirst($property).'Exception';
+            $validation = $property.'Validate';
+
+            if (method_exists($this, $validation) && !$this->$validation($value)) {
+                if (class_exists($exception)) {
+                    $errors->addError(new $exception);
+                } else {
+                    $errors->addError(new ValidateException());
+                }
+            }
+        }
+        if ($errors->empty()) {
+            foreach ($data as $key => $value) {
+                if (!property_exists($this, $key)) {
+                    continue;
+                }
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+        } else {
+            throw $errors;
+        }
     }
 }

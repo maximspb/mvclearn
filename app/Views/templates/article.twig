@@ -1,0 +1,14 @@
+{% extends 'layout.twig' %}
+{% block body %}
+<div align="right">
+    <a href="/news/edit/?id={{article.id}}" class="btn btn-dark">Редактировать новость</a> ||
+    <a href="/news/delete/?id={{article.id}}" class="btn btn-danger">Удалить новость</a>
+</div>
+<h1 id="articleTitle">{{article.title}}</h1>
+
+<p>
+    {{article.text}}
+</p>
+    {% set vars = {'article' : article, 'session' : session} %}
+    {% include 'comments.twig' with vars %}
+{% endblock %}

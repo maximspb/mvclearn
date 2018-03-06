@@ -2,32 +2,39 @@
 
 namespace App;
 
+use Twig_Environment;
+use Twig_Loader_Filesystem;
+use App\Traits\MagicSetTrait;
+
 class View
 {
-
-    public $table;
-    protected $data;
-
-    public function __set($name, $value)
+    use MagicSetTrait;
+    protected $twig;
+    public function __construct()
     {
-        $this->data[$name] = $value;
-
-
+        $templatesPath = Config::getInstance()->getParams()['templates']['path'];
+        $cache = Config::getInstance()->getParams()['cache']['twig'];
+        $loader = new Twig_Loader_Filesystem($templatesPath);
+        $this->twig = new Twig_Environment($loader, [
+            'cache' => $cache,
+            'debug'=>true
+            ]);
+        $logged =!empty($_SESSION['logged']) ? true : false;
+        $this->twig->addGlobal('logged', $logged);
     }
 
-    public function __get($name)
+    public function display(string $template, array $params = [])
     {
-        return $this->data[$name];
+        try {
+            $this->twig->display($template, $params);
+        } catch (\Exception|\Throwable $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
     }
 
-    public function __isset($name)
+    public function twig()
     {
-        return isset($this->data[$name]);
+        return $this->twig;
     }
-
-    public function getData()
-    {
-        return $this->data;
-    }
-
 }
