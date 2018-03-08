@@ -14,21 +14,21 @@ class Application
     protected $request;
     protected $config = [];
     protected static $connect;
-    //protected $view;
+    protected $view;
     public function __construct(array $config)
     {
-
         $this->request = new Request();
-        $this->config = $config;
+        $this->view = new View($config);
         static::$connect = Database::getInstance($config);
-        //$this->view = new View($this->config);
+        //конфиг передается в защищенное свойство на случай,
+        //если в дальнейшем появятся дополнительные запросы к нему:
+        $this->config = $config;
     }
 
     public function run()
     {
         try {
-            $view = new View($this->config);
-            ((new Router())->route($this->request, $view, static::$connect));
+            ((new Router())->makeController($this->request, $this->view));
         } catch (NotFoundException|\Throwable $exception) {
             echo $exception->getMessage();
             header("HTTP/1.0 404 Not Found");
@@ -36,6 +36,9 @@ class Application
         }
     }
 
+    /**
+     * статичный метод для обращения к БД в моделях
+     */
     public static function getConnect()
     {
         return static::$connect;

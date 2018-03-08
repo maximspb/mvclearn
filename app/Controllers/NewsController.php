@@ -75,7 +75,7 @@ class NewsController extends Controller
         $id = strip_tags($this->request->getRequestVars('id'));
         if (!empty($id)) {
             try {
-                News::delete(strip_tags($this->news_id));
+                News::delete(strip_tags($id));
                 header('Location:/');
                 exit();
             } catch (\Throwable $exception) {
