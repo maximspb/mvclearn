@@ -56,7 +56,7 @@ class NewsController extends Controller
         $id = strip_tags($this->request->getRequestVars('id'));
         $article = !empty($id) ? News::findOne($id) : new News();
         try {
-            $article->fill(Application::getMultiple());
+            $article->fill($this->request->allValues());
             $article->save();
             header('Location:/news');
             exit();
