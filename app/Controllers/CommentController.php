@@ -1,7 +1,6 @@
 <?php
 namespace App\Controllers;
 
-use App\Application;
 use App\Models\Comment;
 use App\Exceptions\MultiException;
 use App\Exceptions\DeleteCommentException;
@@ -10,10 +9,10 @@ class CommentController extends Controller
 {
     public function actionCreate()
     {
-        $newsId = Application::getRequest('newsId');
+        $newsId = $this->request->getRequestVars('newsId');
         try {
             $comment = new Comment();
-            $comment->fill(Application::getMultiple());
+            $comment->fill($this->request->allValues());
             $comment->save();
             unset($_SESSION['errorsExist']);
             header('Location:/news/read/?id='.$newsId);
@@ -28,8 +27,8 @@ class CommentController extends Controller
 
     public function actionDelete()
     {
-        $commentId = Application::getRequest('commentId');
-        $articleId = Application::getRequest('articleId');
+        $commentId = $this->request->getRequestVars('commentId');
+        $articleId = $this->request->getRequestVars('articleId');
         try {
             Comment::delete($commentId);
             header('Location:/news/read/?id='.$articleId);

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Application;
 use App\BaseModel;
-use App\Database;
 
 class Comment extends BaseModel
 {
@@ -16,7 +16,7 @@ class Comment extends BaseModel
     {
         $options =[':id' => $id];
         $sql = 'SELECT * from comment WHERE newsId =:id';
-        return Database::getInstance()->query($sql, $options);
+        return Application::getConnect()->query($sql, $options);
     }
 
     protected function usernameValidate(string $username)

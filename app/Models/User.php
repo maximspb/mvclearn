@@ -1,8 +1,8 @@
 <?php
 namespace App\Models;
 
+use App\Application;
 use App\BaseModel;
-use App\Database;
 
 class User extends BaseModel
 {
@@ -14,14 +14,14 @@ class User extends BaseModel
     protected static function allEmails()
     {
         $sql ='SELECT email from '. static::$table;
-        return array_column(Database::getInstance()->query($sql), 'email');
+        return array_column(Application::getConnect()->query($sql), 'email');
     }
 
     protected static function getUserHash(string $email)
     {
         $sql ='SELECT password from '.static::$table.' WHERE email = :email';
-        $options =[':email' => $email];
-        return Database::getInstance()->query($sql, $options)[0]-> password;
+        $options = [':email' => $email];
+        return Application::getConnect()->query($sql, $options)[0]-> password;
     }
 
     public static function exists(string $email)
@@ -49,7 +49,7 @@ class User extends BaseModel
     {
         $sql = 'SELECT * FROM '. static::$table.' WHERE email = :email';
         $options = [':email' => $email];
-        return Database::getInstance()->query($sql, $options, static::class);
+        return Application::getConnect()->query($sql, $options, static::class);
     }
 
     public function setPassword()

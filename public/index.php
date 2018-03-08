@@ -3,7 +3,8 @@ session_start();
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$app = new \App\Application();
+$config = require_once __DIR__.'/../app/configs/config-main.php';
+$app = new \App\Application($config);
 try {
     $app->run();
 } catch (\App\Exceptions\NotFoundException $e) {

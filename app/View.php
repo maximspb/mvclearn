@@ -10,11 +10,12 @@ class View
 {
     use MagicSetTrait;
     protected $twig;
-    public function __construct()
+    public function __construct(array $config)
     {
-        $templatesPath = Config::getInstance()->getParams()['templates']['path'];
-        $cache = Config::getInstance()->getParams()['cache']['twig'];
+        $templatesPath = $config['templates']['path'];
+        $cache = $config['cache']['twig'];
         $loader = new Twig_Loader_Filesystem($templatesPath);
+
         $this->twig = new Twig_Environment($loader, [
             'cache' => $cache,
             'debug'=>true

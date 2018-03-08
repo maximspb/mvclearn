@@ -14,7 +14,7 @@
 <form id="editForm" action="/comment/create/?newsId={{article.id}}" method="post" class="form-group">
 
     <input type="text" name="username" class="form-control" value="{{ session.logged }}"><br>
-
+    <input type="hidden" name="newsId" value="{{article.id}}">
     <input type="text" name="text" class="form-control"><br>
     <button type="submit" class="btn btn-success">Отправить коммент</button>
 </form>

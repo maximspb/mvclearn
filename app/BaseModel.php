@@ -21,7 +21,7 @@ abstract class BaseModel
     public static function findAll()
     {
         $sql = 'SELECT * FROM '. static::$table;
-        return Database::getInstance()->query($sql, [], static::class);
+        return Application::getConnect()->query($sql, [], static::class);
     }
 
 
@@ -30,7 +30,7 @@ abstract class BaseModel
         $sql = 'SELECT * FROM '. static::$table. ' WHERE id =:id';
         $options =[':id'=>$id];
 
-        $result = Database::getInstance()->query($sql, $options, static::class);
+        $result = Application::getConnect()->query($sql, $options, static::class);
         if (!empty($result)) {
             return $result[0];
         } else {
@@ -59,8 +59,8 @@ abstract class BaseModel
             implode(', ', array_keys($insertValues)).')'
         ;
 
-        Database::getInstance()->execute($sql, $insertValues);
-        $this->id = Database::getInstance()->setId();
+        Application::getConnect()->execute($sql, $insertValues);
+        $this->id = Application::getConnect()->setId();
     }
 
 
@@ -82,7 +82,7 @@ abstract class BaseModel
             ' SET '.implode(', ', $setFields).
             ' WHERE id = :id';
 
-        Database::getInstance()->execute($sql, $updateValues);
+        Application::getConnect()->execute($sql, $updateValues);
     }
 
 
@@ -90,10 +90,8 @@ abstract class BaseModel
     {
         $options =[':id'=>$id];
         $sql = 'DELETE  FROM '. static::$table.' WHERE id = :id';
-
-        Database::getInstance()->execute($sql, $options);
+        Application::getConnect()->execute($sql, $options);
     }
-
 
     public function save()
     {

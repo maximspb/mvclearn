@@ -12,12 +12,6 @@ use App\Exceptions\NotFoundException;
 class NewsController extends Controller
 {
 
-    protected $news_id;
-    public function __construct()
-    {
-        parent::__construct();
-        $this->news_id = Application::getRequest('id');
-    }
 
     public function actionIndex()
     {
@@ -29,14 +23,15 @@ class NewsController extends Controller
     {
         $session  = $_SESSION;
 
+        $id = strip_tags($this->request->getRequestVars('id'));
         try {
-            $article = News::findOne(strip_tags($this->news_id));
+            $article = News::findOne($id);
 
         } catch (NotFoundException $exception) {
                 echo $exception->getMessage();
                 exit(1);
         }
-        $comments = Comment::findNewsComments(strip_tags($this->news_id));
+        $comments = Comment::findNewsComments($id);
         $this->view->display('article.twig', [
             'article' => $article,
             'comments' => $comments,
@@ -46,9 +41,9 @@ class NewsController extends Controller
 
     public function actionEdit()
     {
-        $id = $this->news_id;
+        $id = strip_tags($this->request->getRequestVars('id'));
         try {
-            $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
+            $article = !empty($id) ? News::findOne($id) : new News();
         } catch (NotFoundException $exception) {
             echo $exception->getMessage();
             exit(1);
@@ -58,8 +53,8 @@ class NewsController extends Controller
 
     public function actionSave()
     {
-        $id = $this->news_id;
-        $article = !empty($id) ? News::findOne(strip_tags($id)) : new News();
+        $id = strip_tags($this->request->getRequestVars('id'));
+        $article = !empty($id) ? News::findOne($id) : new News();
         try {
             $article->fill(Application::getMultiple());
             $article->save();
@@ -77,7 +72,8 @@ class NewsController extends Controller
 
     public function actionDelete()
     {
-        if (!empty(strip_tags($this->news_id))) {
+        $id = strip_tags($this->request->getRequestVars('id'));
+        if (!empty($id)) {
             try {
                 News::delete(strip_tags($this->news_id));
                 header('Location:/');

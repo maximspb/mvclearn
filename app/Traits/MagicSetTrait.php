@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: root
- * Date: 2/21/18
- * Time: 2:36 AM
- */
-
 namespace App\Traits;
 
 trait MagicSetTrait

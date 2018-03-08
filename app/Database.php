@@ -16,10 +16,9 @@ class Database
 
     private static $instance;
 
-    private function __construct()
+    private function __construct($config)
     {
-
-        $config = Config::getInstance()->getParams()['dbConnect'];
+        $config = $config['dbConnect'];
 
         try {
             $this->connect = new \PDO(
@@ -40,15 +39,13 @@ class Database
      * @throws DbConnectException
      * статичный метод вызова объекта
      */
-    public static function getInstance()
+    public static function getInstance($config)
     {
         if (empty(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = new self($config);
         }
         return self::$instance;
     }
-
-
 
     public function query(string $sql, array $params = [], $class = \stdClass::class)
     {
@@ -57,7 +54,6 @@ class Database
         $stmt->execute($params);
         return $stmt->fetchAll(\PDO::FETCH_CLASS, $class);
     }
-
 
     public function execute(string $sql, array $params = [])
     {
