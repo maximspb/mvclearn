@@ -16,16 +16,7 @@ abstract class BaseModel
      * имя таблицы модели в базе данных
      */
     protected static $table;
-
     public $id;
-
-    protected static $dbConfig;
-
-    public function __construct()
-    {
-        static::$dbConfig = Config::getInstance()->getParams()['dbConnect'];
-    }
-
 
     public static function findAll()
     {
