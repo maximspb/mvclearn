@@ -4,15 +4,12 @@ namespace App\Controllers;
 
 use App;
 use App\Models\News;
-use App\Application;
 use App\Models\Comment;
 use App\Exceptions\MultiException;
 use App\Exceptions\NotFoundException;
 
 class NewsController extends Controller
 {
-
-
     public function actionIndex()
     {
         $news = News::findAll();
@@ -22,21 +19,20 @@ class NewsController extends Controller
     public function actionRead()
     {
         $session  = $_SESSION;
-
         $id = strip_tags($this->request->getRequestVars('id'));
+        $comments = Comment::findNewsComments($id) ?? [];
+
         try {
             $article = News::findOne($id);
-
-        } catch (NotFoundException $exception) {
+            $this->view->display('article.twig', [
+                'article' => $article,
+                'comments' => $comments,
+                'session' => $session,
+            ]);
+        } catch (NotFoundException|App\Exceptions\DeleteCommentException $exception) {
                 echo $exception->getMessage();
                 exit(1);
         }
-        $comments = Comment::findNewsComments($id);
-        $this->view->display('article.twig', [
-            'article' => $article,
-            'comments' => $comments,
-            'session' => $session,
-        ]);
     }
 
     public function actionEdit()
@@ -53,7 +49,7 @@ class NewsController extends Controller
 
     public function actionSave()
     {
-        $id = strip_tags($this->request->getRequestVars('id'));
+        $id = strip_tags($this->request->allValues()['id']);
         $article = !empty($id) ? News::findOne($id) : new News();
         try {
             $article->fill($this->request->allValues());

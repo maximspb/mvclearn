@@ -1,7 +1,6 @@
 <?php
 namespace App\Controllers;
 
-use App\Application;
 use App\Models\User;
 use App\Exceptions\MultiException;
 
@@ -50,7 +49,8 @@ class UserController extends Controller
         $email = $this->request->getRequestVars('email');
         $password = $this->request->getRequestVars('password');
         if (User::check($email, $password)) {
-            $_SESSION['logged'] = User::findByEmail($email)[0]->getName();
+            $user = User::findByEmail($email)[0];
+            $_SESSION['logged'] = $user->getName();
             header('Location:/news');
         } else {
             $authErrors = true;

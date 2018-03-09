@@ -25,7 +25,7 @@ class Request
         }
     }
 
-    protected function get($param, $default = null)
+    public function get($param, $default = null)
     {
         if (isset($_GET[$param])) {
             return $_GET[$param];
@@ -40,7 +40,6 @@ class Request
         }
         return $default;
     }
-
 
     /**
      * @return array
