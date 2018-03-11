@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Database;
+use App\Exceptions\DbConnectException;
 use App\Exceptions\MultiException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\Validate\ValidateException;
@@ -14,14 +16,17 @@ abstract class BaseModel
      * имя таблицы модели в базе данных
      */
     protected static $table;
-
     public $id;
-
 
     public static function findAll()
     {
         $sql = 'SELECT * FROM '. static::$table;
-        return Database::getInstance()->query($sql, [], static::class);
+        try {
+            return Database::getInstance()->query($sql, [], static::class);
+        } catch (DbConnectException $exception) {
+            echo $exception->getMessage();
+            exit(1);
+        }
     }
 
 
@@ -29,12 +34,16 @@ abstract class BaseModel
     {
         $sql = 'SELECT * FROM '. static::$table. ' WHERE id =:id';
         $options =[':id'=>$id];
-
-        $result = Database::getInstance()->query($sql, $options, static::class);
-        if (!empty($result)) {
-            return $result[0];
-        } else {
-            throw new NotFoundException();
+        try {
+            $result = Database::getInstance()->query($sql, $options, static::class);
+            if (!empty($result)) {
+                return $result[0];
+            } else {
+                throw new NotFoundException();
+            }
+        } catch (DbConnectException|NotFoundException $e) {
+            echo $e->getMessage();
+            exit(1);
         }
     }
 
@@ -58,8 +67,12 @@ abstract class BaseModel
             ' ('.implode(', ', $tableFields).') VALUES ('.
             implode(', ', array_keys($insertValues)).')'
         ;
-
-        Database::getInstance()->execute($sql, $insertValues);
+        try {
+            Database::getInstance()->execute($sql, $insertValues);
+        } catch (DbConnectException $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
         $this->id = Database::getInstance()->setId();
     }
 
@@ -81,8 +94,12 @@ abstract class BaseModel
             .static::$table.
             ' SET '.implode(', ', $setFields).
             ' WHERE id = :id';
-
-        Database::getInstance()->execute($sql, $updateValues);
+        try {
+            Database::getInstance()->execute($sql, $updateValues);
+        } catch (DbConnectException $e) {
+                echo $e->getMessage();
+                exit(1);
+        }
     }
 
 
@@ -90,10 +107,13 @@ abstract class BaseModel
     {
         $options =[':id'=>$id];
         $sql = 'DELETE  FROM '. static::$table.' WHERE id = :id';
-
-        Database::getInstance()->execute($sql, $options);
+        try {
+            Database::getInstance()->execute($sql, $options);
+        } catch (DbConnectException $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
     }
-
 
     public function save()
     {

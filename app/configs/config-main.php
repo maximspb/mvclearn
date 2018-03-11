@@ -1,6 +1,5 @@
 <?php
 return [
-
     'dbConnect' => [
         'host' => 'localhost',
         'dbname' => 'learnbase',
@@ -14,5 +13,4 @@ return [
     'cache' => [
         'twig'=>__DIR__.'/../cache/twig_cache',
     ],
-
 ];

@@ -5,18 +5,15 @@ use App\Exceptions\NotFoundException;
 
 class Router
 {
-
-    public static function getRoute()
+    public function makeController(Request $request, View $view)
     {
-
-
         $uriParts = explode('/', $_SERVER['REQUEST_URI']);
         $controllerName = !empty($uriParts[1]) ? $uriParts[1] : 'index';
         $actionType = !empty($uriParts[2]) ? $uriParts[2] : 'index';
         $class = '\\App\\Controllers\\'.ucfirst($controllerName).'Controller';
 
         if (class_exists($class)) {
-            $controller = new $class();
+            $controller = new $class($request, $view);
         } else {
             throw new NotFoundException();
         }
@@ -24,7 +21,7 @@ class Router
         $action = 'action'.ucfirst($actionType);
 
         try {
-                $controller->$action();
+            $controller->$action();
         } catch (\Throwable  $exception) {
             return null;
         }

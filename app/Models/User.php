@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Config;
 use App\BaseModel;
 use App\Database;
 
@@ -20,7 +21,7 @@ class User extends BaseModel
     protected static function getUserHash(string $email)
     {
         $sql ='SELECT password from '.static::$table.' WHERE email = :email';
-        $options =[':email' => $email];
+        $options = [':email' => $email];
         return Database::getInstance()->query($sql, $options)[0]-> password;
     }
 

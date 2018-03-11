@@ -1,7 +1,6 @@
 <?php
 namespace App\Controllers;
 
-use App\Application;
 use App\Models\User;
 use App\Exceptions\MultiException;
 
@@ -9,11 +8,12 @@ class UserController extends Controller
 {
     public function actionCreate()
     {
-        $email = Application::getRequest('email');
+
+        $email = $this->request->getRequestVars('email');
         if (!User::exists($email)) {
             try {
                 $user = new User();
-                $user->fill(Application::getMultiple());
+                $user->fill($this->request->allValues());
                 $user->setPassword();
                 $user->save();
                 header('Location:/news');
@@ -46,10 +46,11 @@ class UserController extends Controller
 
     public function actionAuth()
     {
-        $email = Application::getRequest('email');
-        $password = Application::getRequest('password');
+        $email = $this->request->getRequestVars('email');
+        $password = $this->request->getRequestVars('password');
         if (User::check($email, $password)) {
-            $_SESSION['logged'] = User::findByEmail($email)[0]->getName();
+            $user = User::findByEmail($email)[0];
+            $_SESSION['logged'] = $user->getName();
             header('Location:/news');
         } else {
             $authErrors = true;

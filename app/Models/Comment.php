@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\BaseModel;
 use App\Database;
+use App\Exceptions\DbConnectException;
 
 class Comment extends BaseModel
 {
@@ -16,7 +17,12 @@ class Comment extends BaseModel
     {
         $options =[':id' => $id];
         $sql = 'SELECT * from comment WHERE newsId =:id';
-        return Database::getInstance()->query($sql, $options);
+        try {
+            return Database::getInstance()->query($sql, $options);
+        } catch (DbConnectException $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
     }
 
     protected function usernameValidate(string $username)
