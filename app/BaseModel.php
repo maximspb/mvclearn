@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Database;
 use App\Exceptions\DbConnectException;
 use App\Exceptions\MultiException;
 use App\Exceptions\NotFoundException;

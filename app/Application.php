@@ -25,8 +25,12 @@ class Application
 
     public function run()
     {
+        $routeParams = Router::parseUri();
         try {
-            ((new Router())->makeController($this->request, $this->view));
+            $class = '\\App\\Controllers\\'.ucfirst($routeParams['name']).'Controller';
+            $action = 'action'.ucfirst($routeParams['action']);
+            $controller = new $class($this->request, $this->view);
+            $controller->$action();
         } catch (NotFoundException|\Throwable $exception) {
             echo $exception->getMessage();
             header("HTTP/1.0 404 Not Found");
